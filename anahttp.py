@@ -78,7 +78,7 @@ class anaHTTP:
     allpackets = dict()
     lastPacket = False
     whiteList = {'.css': True, '.js': True, '.exe': True}
-    whiteListDomains = ('googleapis.com', 'hit.gemius.pl', 'ad.adview.pl', 'google-analytics.com', 's.photoblog.pl', 's.photoblog.pl/gazeta/ban.css', 'gstatic.com/', 'favicon.ico', 'ytimg.com/i/')
+    whiteListDomains = ('googleapis.com', 'hit.gemius.pl', 'ad.adview.pl', 'google-analytics.com', 's.photoblog.pl', 's.photoblog.pl/gazeta/ban.css', 'gstatic.com/', 'favicon.ico', 'ytimg.com/i/', 'safebrowsing-cache.google.com', 'adview.pl/ads/', 'openx.xenium.pl/www/', 'l.ghostery.com', 'safebrowsing.clients.google.com', 'chart.apis.google.com')
 
     def dataParser(self, sid):
         header = self.allpackets[sid]['data']

@@ -62,7 +62,8 @@ class Database:
     def __init__(self, databaseDir):
         if not os.path.isfile(databaseDir):
             print("Database file does not exists")
-            return False
+            sys.exit(0)
+            
 
         self.socket = sqlite3.connect(databaseDir, check_same_thread = False)
 
@@ -108,7 +109,15 @@ class anaHttpView:
         currentDate = datetime.date.today()
         self.home = os.path.expanduser("~/.anahttp/")
 
-        self.DB = Database(self.home+"/"+str(currentDate.day)+"."+str(currentDate.month)+"."+str(currentDate.year))
+        dbFile = self.home+"/"+str(currentDate.day)+"."+str(currentDate.month)+"."+str(currentDate.year)
+
+        if not os.path.isfile(dbFile):
+            k = os.listdir(self.home)
+
+            if len(k) > 0:
+                dbFile = self.home+"/"+k[0]
+
+        self.DB = Database(dbFile)
         self.drawInterface()
         self.addFromDB()
 
@@ -181,6 +190,10 @@ class anaHttpView:
 
         self.treestore.clear()
         self.addFromDB(query="SELECT * FROM `history` "+statement.build())
+
+    def newQuerySearch(self, a=''):
+        self.treestore.clear()
+        self.addFromDB(self.queryText.get_text())
 
     def exitApplication(self, a='', b=''):
         sys.exit(0)
@@ -270,6 +283,7 @@ class anaHttpView:
         searchButton = gtk.Button("Search")
         searchButton.connect("clicked", self.newSearch)
 
+        # first row
         hbox = gtk.HBox()
         hbox.pack_start(searchLabel)
         hbox.pack_start(self.searchURL)
@@ -279,10 +293,27 @@ class anaHttpView:
         hbox.pack_start(self.searchMethod)
         hbox.pack_end(searchButton)
 
+        queryLabel = gtk.Label("DB Query: ")
+        self.queryText = gtk.Entry()
+        self.queryText.set_text("SELECT * FROM `history`")
+
+        queryButton = gtk.Button("Search")
+        queryButton.connect("clicked", self.newQuerySearch)
+
+        tableLabel = gtk.Label("Columns: id, date, url, cookie, method")
+
+        # second row
+        hboxQuery = gtk.HBox()
+        hboxQuery.pack_start(queryLabel)
+        hboxQuery.pack_start(self.queryText)
+        hboxQuery.pack_start(queryButton)
+
 
         Box = gtk.VBox()
         Box.pack_start(scrolled_window, True, True, 1)
-        Box.pack_end(hbox, False, False, 1)
+        Box.pack_start(hbox, False, False, 1)
+        Box.pack_end(hboxQuery, False, False, 1)
+        Box.pack_start(tableLabel, False, False, 1)
 
         self.window.add(Box)
         self.window.show_all()
