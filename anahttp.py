@@ -58,6 +58,7 @@ class Database:
 
         try:
             self.cursor.execute("CREATE TABLE `history` (id int(2) primary key, date double(64), url varchar(1024), cookie varchar(60), method int(1));")
+            #self.cursor.execute("CREATE TABLE `ssl` (ip varchar(128) primary key, date double(64));")
         except sqlite3.OperationalError:
             pass
 
@@ -74,11 +75,13 @@ class Database:
         return True
 
 class anaHTTP:
-    expr = 'tcp port http'
+    expr = 'tcp port http or tcp port 443'
     allpackets = dict()
     lastPacket = False
     whiteList = {'.css': True, '.js': True, '.exe': True}
     whiteListDomains = ('googleapis.com', 'hit.gemius.pl', 'ad.adview.pl', 'google-analytics.com', 's.photoblog.pl', 's.photoblog.pl/gazeta/ban.css', 'gstatic.com/', 'favicon.ico', 'ytimg.com/i/', 'safebrowsing-cache.google.com', 'adview.pl/ads/', 'openx.xenium.pl/www/', 'l.ghostery.com', 'safebrowsing.clients.google.com', 'chart.apis.google.com')
+
+    sslCache = list()
 
     def dataParser(self, sid):
         header = self.allpackets[sid]['data']
@@ -132,6 +135,14 @@ class anaHTTP:
 
             self.db.addLink(completeUrl, cookie, methodInt, time.time())
 
+    def sslHost(self, ipsrc, ipdst):
+
+        id = ipsrc+"_"+ipdst
+
+        if not id in self.sslCache:
+            self.db.addLink(ipsrc+" -> "+ipdst, "", 0, time.time())
+            self.sslCache.append(id)
+
 
     def httpCallback(self, pkt):
         if pkt.haslayer(TCP):
@@ -146,6 +157,11 @@ class anaHTTP:
                     ack = pkt.getlayer(TCP).ack
                     sport = pkt.sprintf("%IP.sport%")
                     dport = pkt.sprintf("%IP.dport%")
+
+                    if str(sport) == "443":
+                        print tcpdata
+                        self.sslHost(ipsrc, ipdst)
+                        return None
 
                     TCP_SID = str(ack)+str(ipsrc)+str(ipdst) # UNIQUE KEY FOR EACH SESSION
 

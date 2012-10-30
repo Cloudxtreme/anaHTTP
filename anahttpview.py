@@ -126,6 +126,8 @@ class anaHttpView:
     def addLink(self, date, method, url, cookies, parent=None):
         if method == 1:
             method = "GET"
+        elif method == 0:
+            method = "SSL"
         else:
             method = "POST"
 
@@ -180,8 +182,10 @@ class anaHttpView:
         if self.searchMethod.get_active_text() != "All":
             if self.searchMethod.get_active_text() == "POST":
                 method = "2"
-            else:
+            elif self.searchMethod.get_active_text() == "GET":
                 method = "1"
+            else:
+                method = "0"
 
             statement.push("method", method)
 
@@ -278,6 +282,7 @@ class anaHttpView:
         self.searchMethod.append_text("All")
         self.searchMethod.append_text("POST")
         self.searchMethod.append_text("GET")
+        self.searchMethod.append_text("SSL")
         self.searchMethod.set_active(0)
 
         searchButton = gtk.Button("Search")
