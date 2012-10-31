@@ -159,7 +159,6 @@ class anaHTTP:
                     dport = pkt.sprintf("%IP.dport%")
 
                     if str(sport) == "443":
-                        print tcpdata
                         self.sslHost(ipsrc, ipdst)
                         return None
 
